@@ -51,3 +51,165 @@ Spring AOP基于注解配置的情况下，需要依赖于AspectJ包的标准注
 
 目前，静态代理主要有AspectJ静态代理、JDK静态代理技术、而动态代理有JDK动态代理、Cglib动态代理技术，而Spring Aop是整合使用了JDK动态代理和Cglib动态代理两种技术，下面我们结合实例一步一步介绍所有的概念。
 
+##### 15、BeanFactory 和 FactoryBean？
+
+BeanFactory是个Factory，也就是IOC容器或对象工厂，FactoryBean是个Bean。
+
+ApplicationContext、xmlBeanFactory、de faultlistenerbeanfactory都是实现了be anfactory接口。
+
+在Spring中，所有的Bean都是由BeanFactory(也就是IOC容器)来进行管理的。但对FactoryBean而言，这个Bean不是简单的Bean，而是一个能生产或者修饰对象生成的工厂Bean,它的实现与设计模式中的工厂模式和修饰器模式类似.
+
+如果想获取获取 factoryBean 实例对象 ，通过 ge tBean("&beanname")
+
+https://blog.csdn.net/qiesheng/article/details/72875315
+
+##### 16、Spring IOC 的理解，其初始化过程？
+
+Ioc:让你脱离对依赖对象的维护，只需要随用随取，不需要关心依赖对象的任何过程。
+
+自动注入对象，涉及到对象的构建和绑定。
+
+ioc容器： beanFactory 和 ApplicationContext两种容器对bean的管理
+
+https://blog.csdn.net/chenssy/article/details/82343456
+
+##### 17、BeanFactory 和 ApplicationContext？
+
+​	beanfactory ioc容器，创建管理bean, BeanDefinition是其基本结构，内部维护一个map。无法支持aop,web应用。
+
+重点：当我们使用BeanFactory去获取Bean的时候，我们只是实例化了该容器，而该容器中的bean并没有被实例化。当我们getBean的时候，才会实时实例化该bean对象。
+
+​	applicationContext继承beanFactory, 应用上下文，有着更多的功能，当我们使用ApplicationContext去获取bean的时候，在加载XXX.xml的时候，会创建所有的配置bean。
+
+​	1.提供国际化的标准访问策略
+
+​	2.提供强大的事件机制
+
+​	3.扩展了reourceLoader, 可加载多个resource，访问不同资源。
+
+​	4.对web应用支持。
+
+ 区别总结
+	1.如果使用ApplicationContext，如果配置的bean是singleton，那么不管你有没有或想不想用它，它都会被实例化。好处是可以预先加载，坏处是浪费内存。
+	2.BeanFactory，当使用BeanFactory实例化对象时，配置的bean不会马上被实例化，而是等到你使用该bean的时候（getBean）才会被实例化。好处是节约内存，坏处是速度比较慢。多用于移动设备的开发。
+	3.没有特殊要求的情况下，应该使用ApplicationContext完成。因为BeanFactory能完成的事情，ApplicationContext都能完成，并且提供了更多接近现在开发的功能。
+
+##### 18、Spring Bean 的生命周期，如何被管理的？
+
+https://www.zhihu.com/question/38597960
+
+![img](./pic/bean生命周期.jpg)
+
+1.Spring对Bean进行实例化（相当于程序中的new Xx()）
+
+2.Spring将值和Bean的引用注入进Bean对应的属性中
+
+3.如果Bean实现了BeanNameAware接口，Spring将Bean的ID传递给setBeanName()方法
+**（实现BeanNameAware清主要是为了通过Bean的引用来获得Bean的ID，一般业务中是很少有用到Bean的ID的**）
+
+4.如果Bean实现了BeanFactoryAware接口，Spring将调用setBeanFactory(BeanFactory bf)方法并把BeanFactory容器实例作为参数传入。
+**（实现BeanFactoryAware 主要目的是为了获取Spring容器，如Bean通过Spring容器发布事件等）**
+
+5.如果Bean实现了ApplicationContextAwaer接口，Spring容器将调用setApplicationContext(ApplicationContext ctx)方法，把y应用上下文作为参数传入.
+**(作用与BeanFactory类似都是为了获取Spring容器，不同的是Spring容器在调用setApplicationContext方法时会把它自己作为setApplicationContext 的参数传入，而Spring容器在调用setBeanDactory前需要程序员自己指定（注入）setBeanDactory里的参数BeanFactory )**
+
+6.如果Bean实现了BeanPostProcess接口，Spring将调用它们的postProcessBeforeInitialization（预初始化）方法
+**（作用是在Bean实例创建成功前对进行增强处理，如对Bean进行修改，增加某个功能）**
+
+7.如果Bean实现了InitializingBean接口，Spring将调用它们的afterPropertiesSet方法，作用与在配置文件中对Bean使用init-method声明初始化的作用一样，都是在Bean的全部属性设置成功后执行的初始化方法。
+
+8.如果Bean实现了BeanPostProcess接口，Spring将调用它们的postProcessAfterInitialization（后初始化）方法
+**（作用与6的一样，只不过6是在Bean初始化前执行的，而这个是在Bean初始化后执行的，时机不同 )**
+
+9.经过以上的工作后，Bean将一直驻留在应用上下文中给应用使用，直到应用上下文被销毁
+
+10.如果Bean实现了DispostbleBean接口，Spring将调用它的destory方法，作用与在配置文件中对Bean使用destory-method属性的作用一样，都是在Bean实例销毁前执行的方法。
+
+
+
+##### 19、Spring Bean 的加载过程是怎样的？
+
+通过 `ResourceLoader`和其子类`DefaultResourceLoader`完成资源文件位置定位，实现从类路径，文件系统，url等方式定位功能，完成定位后得到`Resource`对象，再交给`BeanDefinitionReader`，它再委托给`BeanDefinitionParserDelegate`完成bean的解析并得到`BeanDefinition`对象，然后通过`registerBeanDefinition`方法进行注册，IOC容器内维护了一个HashMap来保存该`BeanDefinition`对象，Spring中的`BeanDefinition`其实就是我们用的`JavaBean`。
+
+
+https://juejin.im/post/5d3fad9ce51d4561f40adce3
+
+#####20、如果要你实现Spring AOP，请问怎么实现？
+
+​	jdk动态代理，被代理对象需要实现目标接口，proxy.newProxyInstance()
+
+​	cglib动态代码，不需要实现目标接口，动态生成一个子类，子类方法覆盖父类方法，但是final方法没办法重写。
+
+##### 21、如果要你实现Spring IOC，你会注意哪些问题？
+
+
+
+##### 22、Spring 是如何管理事务的，事务管理机制？
+
+​	基于 @Transactional 的方式将声明式事务管理简化到了极致。开发人员只需在配置文件中加上一行启用相关后处理 Bean 的配置，然后在需要实施事务管理的方法或者类上使用 @Transactional 指定事务规则即可实现事务管理，而且功能也不必其他方式逊色。
+
+
+
+##### 23、Spring 的不同事务传播行为有哪些，干什么用的？
+
+https://juejin.im/entry/5a8fe57e5188255de201062b
+
+​	主要用到三个：
+
+​		propagation_request:	如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是最常见的选择。
+
+**在外围方法开启事务的情况下Propagation.REQUIRED修饰的内部方法会加入到外围方法的事务中，所有Propagation.REQUIRED修饰的内部方法和外围方法均属于同一事务，只要一个方法回滚，整个事务均回滚。**
+
+​		propagation_request_new：新建事务，如果当前存在事务，把当前事务挂起。
+
+**在外围方法开启事务的情况下Propagation.REQUIRES_NEW修饰的内部方法依然会单独开启独立事务，且与外部方法事务也独立，内部方法之间、内部方法和外部方法事务均相互独立，互不干扰。**
+
+​		propagation_nested：如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与PROPAGATION_REQUIRED类似的操作。
+
+**外围方法开启事务的情况下Propagation.NESTED修饰的内部方法属于外部事务的子事务，外围主事务回滚，子事务一定回滚，而内部子事务可以单独回滚而不影响外围主事务和其他子事务**
+
+##### 24、Spring 中用到了那些设计模式？
+
+​	单例，代理，装饰，注册
+
+##### 25、Spring MVC 的工作原理？
+
+![img](./pic/springmvc工作原理.jpg)
+
+1、  首先用户发送请求——>DispatcherServlet，前端控制器收到请求后自己不进行处理，而是委托给其他的解析器进行处理，作为统一访问点，进行全局的流程控制；
+
+2、  DispatcherServlet——>HandlerMapping， HandlerMapping将会把请求映射为HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象、多个HandlerInterceptor拦截器）对象，通过这种策略模式，很容易添加新的映射策略；
+
+3、  DispatcherServlet——>HandlerAdapter，HandlerAdapter将会把处理器包装为适配器，从而支持多种类型的处理器，即适配器设计模式的应用，从而很容易支持很多类型的处理器；
+
+4、  HandlerAdapter——>处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理；并返回一个ModelAndView对象（包含模型数据、逻辑视图名）；
+
+5、  ModelAndView的逻辑视图名——> ViewResolver， ViewResolver将把逻辑视图名解析为具体的View，通过这种策略模式，很容易更换其他视图技术；
+
+6、  View——>渲染，View会根据传进来的Model模型数据进行渲染，此处的Model实际是一个Map数据结构，因此很容易支持其他视图技术；
+
+7、返回控制权给DispatcherServlet，由DispatcherServlet返回响应给用户，到此一个流程结束。
+
+##### 26、Spring 循环注入的原理？
+
+https://blog.csdn.net/jijianshuai/article/details/78122738
+
+主要看bean的作用范围：
+
+​	singletion单例：
+
+​		1.构造器，不行，需要等待彼此创建，失败
+
+​		2.setter()方法，可以，以为spring容器对单例对象有缓存，可以构造成功，提前报露对象出来，后续再setter。
+
+​	prototype范围：
+
+​		直接报错，不存在缓存，无法创建bean。
+
+##### 27、Spring 如何保证 Controller 并发的安全？
+
+SpringMVC 中的 controller 默认是单例的，那么如果不小心在类中定义了类变量，那么这个类变量是被所有请求共享的，这可能会造成多个请求修改该变量的值，出现与预期结果不符合的异常。所以如上所述，属性变量会到值线程安全问题，解决方法包括使用 threadLocal 或不使用属性变量、配置为多例均可（加锁控制效率不行）
+。
+
+只需要在类上添加注解@Scope("prototype")即可，这样每次请求调用的类都是重新生成的（每次生成会影响效率）
+

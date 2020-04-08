@@ -1,15 +1,19 @@
-redis篇：
+### redis篇：
 
-    1.有很多问题会被问哦，参考《redis设计与实现》
-    2.redis一致性hash, hash环。
-        https://zhuanlan.zhihu.com/p/34985026
+#####1.有很多问题会被问哦，参考《redis设计与实现》
+
+##### 2.redis一致性hash, hash环。
+
+  https://zhuanlan.zhihu.com/p/34985026
+
+
     3.讲讲哨兵模式
     了解清楚了哨兵模式的原理，需要进行复习，做一些面试题，然后总结输出 2019.11.10 
     4.aof和rdb, 说说区别
     5.说说redis的基础数据结构，跳表的实现
     6.redis的过期策略。
     7.Redis 的 ZSET 做排行榜时，如果要实现分数相同时按时间顺序排序怎么实现？ 说了一个将 score 拆成高 32 位和低 32 位，高 32 位存分数，低 32 位存时间的方法。问还有没有其他方法，想不出了
-
+    
     8.redis 持久化有哪几种方式，怎么选？
     https://www.jianshu.com/p/bedec93e5a7b
     redis是内存型数据库，数据也是可以落盘的。
@@ -21,31 +25,31 @@ redis篇：
         特点：安全性高，可将数据及时同步到文件中，需要较多io，尺寸较大，恢复速度较慢，但是完整。
         优点：可以保持更高的数据完整性，因此已成为主流的持久化方案
         缺点：AOF文件比RDB文件大，且恢复速度慢。
-
+    
     平时redis实例就打开aof，主从同步就用rdb.
-
+    
     详解：
     1.rdb持久化：
         1.功能：把redis在内存中的状态数据保存到磁盘中。
         2.执行方式：
             1.可手动执行。
-            2.也可在redis.conf中配置，定期执行。
+            2.也可在redis.conf中配置，定期执行。 
         3.文件： rdb持久化产生的rdb文件是一个压缩过的二进制文件，保存在硬盘中。
         4.生成方式：
             1.save： 阻塞redis服务器进程，知道rdb文件创建完毕。
             2.bgsave: 派生一个子进程来创建rdb文件，记录bgsave当时的数据库状态。，搞定后，子进程会发信号给父进程，父进程也是会轮询接受子进程信号。
         4.重新redis,自动载入rdb文件。若开启了aof持久化，先加载aof文件。
         5.rdb,保存键值， cpoy on write模式，每次都是全量的备份。
-
-        RDB：在指定的时间间隔能对数据进行快照存储。
     
+        RDB：在指定的时间间隔能对数据进行快照存储。
+
 
     2.aof持久化
         1.备份数据库接收到的命令，追加到文件中。
         2.redis默认每隔一秒写入aof文件。
         3.redis创建一个client, 把aof的命令全部执行一遍。
         4.问题，子进程在处理，主进程又被修改，会发生不一致的问题，因此，会有一个aof 缓冲区 和aof重写缓冲区，等aof重写完，然后把aof重写缓冲区的内容写入aof.
-
+    
     9.redis 主从同步是怎样的过程？
     Redis主从复制分为全量同步和增量同步.
     1.全量同步：
@@ -59,7 +63,7 @@ redis篇：
             6.slave载入完毕后，开始接受命令请求，并执行master发送过来的缓冲区写命令。
     2.增量同步：
         slave初始化开始正常工作后，master发生的写操作同步到slave的过程。master每一次执行写操作都会同步到slave。
-
+    
     10.redis的 zset 怎么实现的？ 尽量介绍的全一点，跳跃表加哈希表以及压缩列表
     http://redisbook.com/preview/object/sorted_set.html
     1.两种编码: 压缩列表（ziplist）、跳跃表（zskiplist）
@@ -76,7 +80,7 @@ redis篇：
             1.hash表和跳跃表之间是会共享集合元素的。
             2.利用hash表，能够非常快速查找元素。O(1), 但是无序，只能靠跳跃表来保持有序。
             3.利用跳跃表能够进行zrank,zrange等操作。
-
+    
     11.redis key 的过期策略和内存淘汰策略
     1.过期策略：
         1.定时过期：每个设置过期的key都会有一个定时器，定时去清除
@@ -86,7 +90,7 @@ redis篇：
           优点：节省cpu资源。
           缺点：占用内存。
         3.定期过期：每隔一定时间，就去扫描数据库中expires字典中一定数量的key, 并清除过期的key。
-
+    
         redis 主要使用惰性过期，定期过期两种。
     2.内存淘汰策略：
         在Redis的用于缓存的内存不足时，怎么处理需要新写入且需要申请额外空间的数据。
@@ -97,7 +101,7 @@ redis篇：
         4.volatile-lru：在设置了过期时间的键空间中，移除最近最少使用的key。
         5.volatile-random：在设置了过期时间的键空间中，随机移除某个key。
         6.volatile-ttl：在设置了过期时间的键空间中，有更早过期时间的key优先移除。
-
+    
     12.redis数据结构有哪些？分别怎么实现的?
     https://www.jianshu.com/p/f8ccf8806095
     1.数据结构：
@@ -116,7 +120,7 @@ redis篇：
             3.减少字符串长度所需的内存重分配次数，<= O(N)
             4.二进制安全，c语言会识别特殊格式字符为结束符 '\0'
             5。保留'\0'，就是为了兼容部分c字符串中函数
-
+    
         2.双向链表
             //链表节点类型
             typedef struct listNode { 
@@ -124,7 +128,7 @@ redis篇：
                 struct listNode * next;
                 void * value; 
             }listNode;
-
+    
             //链表类型
             typedef struct list { 
                 //表头节点
@@ -134,7 +138,7 @@ redis篇：
                 //节点数目, 优化链表求长度
                 unsigned long len;    
             }list;
-
+    
         3.hash表
             跟java的hashmap差不多。
             typedef struct dictht{
@@ -147,7 +151,7 @@ redis篇：
                 //真正存储的键值对数量
                 unsigned long used; 
             } dictht;
-
+    
             typedef struct dictEntry { 
                 //键 
                 void *key; 
@@ -160,11 +164,11 @@ redis篇：
                 //指向下一个节点的指针
                 struct dictEntry *next; 
             } dictEntry;
-
+    
             字典包含ht[0] ht[1],平时都是用ht[0], 只有rehash, 才会用到ht[1]
             redis采用了渐进式rehash,就是同时维护两个hash表hd[0]和hd[1],设置rehash_idx设置为0，在0< rehash_idx < 槽位数组长度时, 对hash表的任何操作除了执行正常的操作过程以外，还会将hd[0]槽位数组rehash_idx索引上的所有键值对rehash到hd[1],这
             个过程中的查找会同时使用两个表进行操作,同时所有的添加键值对操作只会在hd[1]上进行,保证了hd[0]只减不增。rehash完成后,hash表指针指向hd[1],释放hd[0]内存。
-
+    
         4.跳跃表
         5.整数集合
             实际上就是有序无重复的数组, 可以通过二分法进行查找操作
@@ -174,7 +178,7 @@ redis篇：
             | prev_entry_length | encoding | content |
             -----------------------------------------
             其中content为实际数据,encoding存储了content的具体数据类型,prev_entry_length则保存了前一个节点的占用的内存长度,通过这个值就可以定位到前一个节点。在压缩列表中为了节省内存可能会造成连锁更新,因此存在一定的性能隐患,但是由于本身出现的概率就比较小,在节点数量不多的情况下这种影响可以忽略不计。
-
+    
     2. 数据类型：
         1.string类型
             String类型在Redis底层可以是int,raw和embstr,（普通的k-v存储）
@@ -186,7 +190,7 @@ redis篇：
             Set类型在Redis底层可以是intset(整数集合)或hashtable(Hash表),只有当Set中的所有元素均为整数类型时才会使用intset。
         5.zset类型
             Zset类型在Redis底层可以是ziplist(压缩列表)或skiplist(跳跃表)。
-
+    
     13.Redis到底是多线程还是单线程？线程安全吗?
     redis是单线程，线程安全
     redis可以能够快速执行的原因：
@@ -194,20 +198,20 @@ redis篇：
         (2) 采用单线程,避免了不必要的上下文切换和竞争条件
         (3) 非阻塞IO - IO多路复用
         redis内部实现采用epoll，采用了epoll+自己实现的简单的事件框架。epoll中的读、写、关闭、连接都转化成了事件，然后利用epoll的多路复用特性，绝不在io上浪费一点时间 
-
+    
     14.redis集群？
-
+    
     15.redis 哨兵模式（todo）
-
+    
     16.MySQL里有2000w数据，redis中只存20w的数据，如何保证redis中的数据都是热点数据？
       redis内存数据集大小上升到一定大小的时候，就会施行数据淘汰策略
-
+    
     17.redis何时触发淘汰数据的动作
       一个客户端执行指令，导致数据的增加时。
       Redis检测到内存的使用已经达到上限。
       Redis自身执行指令时
       补充：Redis为了避免反复触发淘汰策略，每次会淘汰掉一批数据。
-
+    
     18.Redis相比memcached有哪些优势？
         memcached所有的值均是简单的字符串，redis作为其替代者，支持更为丰富的数据类型
         redis可以持久化其数据
