@@ -216,4 +216,55 @@
         memcached所有的值均是简单的字符串，redis作为其替代者，支持更为丰富的数据类型
         redis可以持久化其数据
 
+##### 19.redis的对外数据结构
+
+string（字符串）
+
+hash（哈希）
+
+list（列表）
+
+set（集合）
+
+zset（有序集合）
+
+![](./pic/redis对外的数据结构.jpg)
+
+Embstr：embstr编码的简单动态字符串(sds)，针对短字符串优化编码的方式，只需一次内存分配
+
+raw：简单动态字符串，需要两次内存分配，redisObject和sdshdr
+
+ziplist: 压缩列表
+
+inset: 整数列表
+
+Skiplist: 跳表+字典（两个hashtable组成，一个hashtable有值，一个为空，做rehash用）
+
+Hashtable: 哈希表
+
+Linkedlist: 双向链表
+
+
+
+##### 20.渐进式hash
+
+哈希表有个负载因子，如果哈希表保存的键值太多或者太少，程序就会rehash，收缩或者扩展。
+
+负载因子=哈希表保存的节点数/哈希表的大小
+
+如果负载因子>1 ,那么就进行rehash了。
+
+这个rehash的过程是渐进式的。慢慢来，不要急。
+
+
+
+步骤：
+
+1.设置索引计数器变量rehashidx=0
+
+2.rehash期间，每次对字典进行增删改查后(rehashidx=哈希值，也就是hashtable的数组下标， 0，1，2，3.。。)， 都会把对应的rehashidx索引上的链表的键值对rehash到新的ht[1]
+
+3.等到所有的键值对操作完了，就把rehashidx=-1
+
+4.rehash期间，ht[0]不再进行增加，ht[1]接受新增元素。ht[0]只减不增，所有操作都会执行两边。
 

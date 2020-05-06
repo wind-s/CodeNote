@@ -96,6 +96,7 @@
 
  
 
+
 ##### 9.java 中的 Math.round(-1.5) 等于多少？
 
     等于 -1，因为在数轴上取值时，中间值（0.5）向右取整，所以正 0.5 是往上取整，负 0.5 是直接舍弃
@@ -187,3 +188,66 @@ ConcurrentHashMap所采用的"分段锁"思想。容器中有多把锁，每一�
 get方法无需加锁，由于其中涉及到的共享变量都使用volatile修饰，volatile可以保证内存可见性，所以不会读取到过期数据。
 
 concurrentHashMap代理到Segment上的put方法，Segment中的put方法是要加锁的。只不过是锁粒度细了而已。ReetranLock.
+
+#####21.exception层次结构
+
+Throwable
+
+​		Error（不可查）
+
+​			VirtualMachineError
+
+​			AWTError
+
+​		Exception
+
+​			IOException（可查）
+
+​				EOFException
+
+​				FileNotFoundException
+
+​			RuntimeException（运行时异常，不可检查，其他的异常都会在编译器可检查出）
+
+​				空指针
+
+​				数组下标越界
+
+​				非法参数
+
+​				。。。
+
+#####22.collection下的直接子接口
+
+Collection集合
+
+​		**Collection接口**
+
+​				**set接口**
+
+​						**HashSet**（无序，不重复）
+
+​				**list接口**
+
+​						**LinkedList**（有序，重复，双向链表）
+
+​						**ArrayList**（有序重复）
+
+​		map接口
+
+​				HashMap（散列表，无序，适合插入，删除，定位）
+
+​				TreeMap(红黑树实现，适合顺序遍历，有序)
+
+​		iterator接口（所有collection接口都有这个接口，可以访问集合中的各个元素，或者删除某个元素）
+
+​				ListIterator
+
+​		comparabel接口（实现了这个方法的类，都可以用comparato()方法，从而确定对象的排序）
+
+​				
+
+
+
+
+
