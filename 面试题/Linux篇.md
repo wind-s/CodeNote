@@ -19,7 +19,7 @@ linux篇：
          3  0 2080268 386068 100140 1869800    0    0     2    11    0    0 11  1 88  0
          0  0 2080268 387588 100156 1869824    0    0     0    68 32266 34914  7  1 92  0
          2  0 2080268 384928 100156 1869872    0    0     0   144 34758 39464 10  2 88  0
-
+    
         主要看procs cpu 两列
          procs:
             r: 运行和等待cpu时间片的进程数，原则上1核的cpu的运行队列不要超过2，整个系统的运行队列不能超过
@@ -29,16 +29,16 @@ linux篇：
             us: 用户进程消耗cpu时间百分比，us值高，用户进程消耗cpu时间多，若长期大于50%，优化程序。
             sy: 内核进程消耗cpu时间百分比。
             us + sy > 80%, 说明可能存在cpu不足
-
+    
             id: 处于空闲的cpu百分比。如果小于百分之60，说明开始有点压力了。
             wa: 系统等待io的cpu时间百分比
             st: 来自于一个虚拟机偷取的cpu时间百分比。
-
+    
         2.查看所有cpu核信息：
             mpstat -P ALL 2
             2s采样一次
             Linux 3.2.0-136-custom (ubuntu)         12/07/2019      _x86_64_        (24 CPU)
-
+    
             03:44:20 PM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest   %idle
             03:44:22 PM  all   14.21    0.02    0.99    0.96    0.00    0.29    0.00    0.00   83.53 （看这行即可）
             03:44:22 PM    0   11.68    0.00    2.03   23.86    0.00    0.51    0.00    0.00   61.93
@@ -58,7 +58,7 @@ linux篇：
             03:49:10 PM     19157    0.00    0.00    0.00    0.00    18  jsvc
             03:49:11 PM     19157    0.00    0.00    0.00    0.00    18  jsvc
             03:49:12 PM     19157    0.00    0.00    0.00    0.00    18  jsvc
-
+    
     3.内存：free
         1.应用程序可用内存数
             free
@@ -71,12 +71,12 @@ linux篇：
         2.查看额外
             pidstat -p 进程号 -r 采样间隔秒数
             Linux 3.2.0-136-custom (ubuntu)         12/07/2019      _x86_64_        (24 CPU)
-
+    
             08:46:20 PM       PID  minflt/s  majflt/s     VSZ    RSS   %MEM  Command
             08:46:22 PM     17439      1.00      0.00 15416648 1582056   9.82  jsvc
             08:46:24 PM     17439      0.00      0.00 15416648 1582056   9.82  jsvc
             08:46:26 PM     17439     83.00      0.00 15416648 1582844   9.83  jsvc
-
+    
     4.硬盘：df -h
         查看磁盘剩余空间
         df -h
@@ -87,20 +87,20 @@ linux篇：
         none            5.0M     0  5.0M   0% /run/lock
         none            7.7G     0  7.7G   0% /run/shm
         /dev/sda3       244G  117G  115G  51% /data
-
+    
     5.磁盘io: iostat
         iostat -xdk 2 3
-
+    
         Linux 3.2.0-136-custom (ubuntu)         12/07/2019      _x86_64_        (24 CPU)
         Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
         sda               0.09    11.00    2.02   10.71    44.39   262.96    48.28     0.02    1.24    1.61    1.16   3.36   4.28
-
+    
         Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
         sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-
+    
         Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
         sda               0.00    15.00    0.00    8.50     0.00    94.00    22.12     0.05    5.65    0.00    5.65   5.65   4.80
-
+    
         磁盘块设备分布
         rkB/s 每秒读取数据量kB
         wkB/s 每秒写入数据量kB
@@ -110,7 +110,7 @@ linux篇：
             rkB/s, wkB/s 根据系统应用不同会有不同的值，但有规律遵循：长期、超大数据读写，肯定不正常，需要优化程序读取。
             svctm的值与await的值很接近， 表示几乎没有I/O 等待，磁盘性能好。
             如果await的值远高于远高于svctm的值，则表示I/O队列等待太长，需要优化程序，或者更换更快磁盘。
-    
+
 
     6.网络： ifstat
         默认本地没有，需要下载
@@ -120,7 +120,7 @@ linux篇：
             ./configure
             make
             make install
-
+    
             wushaofeng@ubuntu:~/ifstat-1.1$ ifstat 1
                    eth0                eth1       
              KB/s in  KB/s out   KB/s in  KB/s out
@@ -128,7 +128,7 @@ linux篇：
                71.89     93.57      0.34      1.08
                60.53     89.90      0.93      0.81
                71.61    108.00      0.54      7.01
-
+    
     3. 生产环境cpu过高，怎么定位解决。
     1.先用top命令找出cpu占比最高的
     2.ps -ef 或者jps进一步定位，得知是一个什么样子的进程
@@ -140,7 +140,7 @@ linux篇：
             -m 显示所有的线程
             -p pid进程使用cpu的时间
             -o 该参数后是用户自定义格式
-
+    
         wushaofeng@ubuntu:~/ifstat-1.1$ ps -mp 60863 -o THREAD,tid,time     
         USER     %CPU PRI SCNT WCHAN  USER SYSTEM   TID     TIME
         www-data  0.3   -    - -         -      -     - 07:47:42
@@ -150,12 +150,12 @@ linux篇：
         www-data  0.0  19    - futex_    -      - 60899 00:00:43
         www-data  0.0  19    - futex_    -      - 60900 00:00:43
         www-data  0.0  19    - futex_    -      - 60901 00:00:42
-
+    
     4.将需要的线程id转换为16进制格式（英文小写格式）
         printf "%x\n" 有问题的线程id
         printf "%x\n" 60863
         edbf
-    5.jstack 进程ID | greo tid(16进制线程ID小写英文) -A60
+    5.jstack 进程ID | greo tid(16进制线程ID小写英文) -A60 打印某个线程的堆栈信息
         jstack 60863 |grep edbf -A60 
         
         一般会报错：
@@ -164,7 +164,8 @@ linux篇：
         处理方法：
             sudo -s
             jstack -F 60863 |grep edbf -A60 
-    6.sudo jstat -gcutil 17439 1000 5
+            
+    6.sudo jstat -gcutil 17439 1000 5 看看进程的内存状况
         root@ubuntu:/home/wushaofeng# sudo jstat -gcutil 17439 1000 5
           S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT   
           0.00   7.48  65.36  96.52  92.14  90.88  70707  419.644 1037871 59070.128 59489.773
@@ -172,7 +173,7 @@ linux篇：
           0.00   7.48  67.13  96.52  92.14  90.88  70707  419.644 1037871 59070.128 59489.773
           0.00   7.48  68.80  96.52  92.14  90.88  70707  419.644 1037871 59070.128 59489.773
           0.00   7.48  70.38  96.52  92.14  90.88  70707  419.644 1037871 59070.128 59489.773
-
+    
          图中参数含义如下： 
             S0 — Heap上的 Survivor space 
             0 区已使用空间的百分比    
@@ -182,3 +183,7 @@ linux篇：
             FGCT– 从应用程序启动到采样时 Full GC 所用的时间(单位秒)     GCT — 从应用程序启动到采样时用于垃圾回收的总时间(单位秒) 
     故障排查：    
     https://www.javatang.com/archives/2017/10/20/12131956.html
+    
+    
+    7.jmap -dump:format=b,file=dump.bin 6764 导出headdump文件，用jvisualvm.exe分析
+    8.jstack -l 6764 >> jstack.out
